@@ -135,3 +135,25 @@ The RedSync base quest extraction documents a game install build labelled 1.0.14
 Proceed to a network prototype only if the observer compiles on the target build, callbacks fire predictably, and the candidate fact maps unambiguously to an outcome. If multiple branches share the same fact or the event arrives too late to prevent local divergence, keep the scope to post-outcome diagnostics and investigate a stronger signal.
 
 No such observer has been implemented in this fork yet. No runtime tests or builds have been performed.
+
+## Follow-up: what the external listener implementation actually tells us
+
+A closer source read of RedSync's mission-sync implementation sharpens the candidate API, but also reinforces the need for a diagnostic-only first step:
+
+- Its comments say `QuestsSystem` is native-only and that wrapping script methods would miss quest-graph fact writes. It uses the engine's exact-name `RegisterListener` mechanism because the callback is reported for native or scripted writes to that fact.
+- There is no wildcard listener in the implementation: it registers one listener per curated fact name.
+- The listener runs after the fact has changed. Its follower approach therefore pins the value back after local divergence; it does not prevent the local quest graph from briefly taking a different route.
+- The source contains an explicitly temporary verification hook and describes its observed install as build `1.0.148`. This is evidence of the project's reported test environment, not validation on our target executable.
+
+Source: [RedSync mission-sync source](https://github.com/nobody71004/RedSync/blob/main/client/RedscriptModule/src/Network/RedSyncMissionSync.reds).
+
+### Updated decision
+
+Keep the first implementation scoped to **logging only**. Do not copy RedSync's broad fact pinning or snapshot behavior into this fork yet. The safest sequence is:
+
+1. Establish whether the exact-name listener compiles and fires on the user's target build.
+2. Log fact name, value, and timestamp without mutating facts or sending network messages.
+3. Compare the observed changes against the quest graph from a disposable save.
+4. Only after that, choose whether a narrowly defined post-outcome event can be synchronized.
+
+This still does not identify the `.quest` / `.questphase` branch mapping for The Pickup; those game resources have not been inspected in this repository. No code was added and no build/runtime test was performed as part of this research update.
