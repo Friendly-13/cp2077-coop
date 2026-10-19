@@ -157,3 +157,24 @@ Keep the first implementation scoped to **logging only**. Do not copy RedSync's 
 4. Only after that, choose whether a narrowly defined post-outcome event can be synchronized.
 
 This still does not identify the `.quest` / `.questphase` branch mapping for The Pickup; those game resources have not been inspected in this repository. No code was added and no build/runtime test was performed as part of this research update.
+## Resource-level investigation result: q003 graph not yet available
+
+Public searches located the q003 fact-name inventory, but did not locate the actual vanilla `q003` `.quest` / `.questphase` / `.scene` resource payload in the checked repositories. Therefore we still cannot responsibly map `q003_deal_started`, `q003_deal_done`, or `q003_royce_bossfight_done` to a particular dialogue branch.
+
+The CDPR modding documentation describes the correct next resource-inspection workflow: locate the questphase resource in WolvenKit's Asset Browser, open it in the graph editor, follow external phase references, and inspect any referenced scene resources. A questphase graph owns progression and fact/journal operations; a scene owns dialogue choices and scene-local exits. The named exit and the questphase continuation are related but distinct.
+
+References:
+- [CDPR Modding Docs: visualize quest files](https://github.com/CDPR-Modding-Documentation/Cyberpunk-Modding-Docs/blob/main/modding-guides/quest/visualize-quest-files.md)
+- [RED Questbook: resource map](https://hlky.github.io/cyberpunk-quest-authoring/reference/resource-map.html)
+- [REDmodding Wiki: quest facts and files](https://wiki.redmodding.org/cyberpunk-2077-modding/for-mod-creators-theory/files-and-what-they-do/file-formats/quests-.scene-files/quests-facts-and-files)
+- [RedSync extracted tracked facts](https://github.com/nobody71004/RedSync/blob/main/release/tracked_facts.json)
+
+### Safe next steps when resource access is approved
+
+1. Use a game-resource browser against the installed game archives; do not modify or repack the original archives.
+2. Locate the `q003` quest root and follow its referenced phase resources to the scene that contains the Militech/Maelstrom negotiation.
+3. Export/read-only inspect the relevant graph and record only resource paths, node types/IDs, outgoing socket names, and exact fact writes.
+4. Trace each candidate fact's writer and downstream readers before treating it as an outcome key.
+5. Keep the eventual runtime test on a disposable save; listener observation first, no fact writes or network relay.
+
+No quest resources were extracted, no tools were installed, and no game/save files were changed during this research pass. Resource-level branch mapping remains blocked pending access to the actual quest assets.
