@@ -107,3 +107,31 @@ Proposed observation-only checklist:
 5. Do not relay or write any of these values to the guest until the listener timing and semantic meaning are verified.
 
 **Do not assume `q003_no_deal` or `q003_royce_boss` is a complete outcome key based only on its name.** The extracted lists may contain historical or derived facts, and a single branch may update several facts.
+
+
+## Follow-up: q003 candidate facts and source-version caveat
+
+The RedSync extracted base-game reference lists several q003 facts for The Pickup, including q003_deal_started, q003_deal_done, q003_deal_combat_done, q003_royce_bossfight_done, and q003_done. This makes q003 a practical candidate for a future observation test, but the list is an extracted fact inventory—not a verified mapping from dialogue options to outcomes.
+
+- [RedSync base-game quest whitelist](https://github.com/nobody71004/RedSync/blob/main/release/BASE-QUEST-WHITELIST.md)
+- [CDPR Modding Docs: visualizing quest files](https://github.com/CDPR-Modding-Documentation/Cyberpunk-Modding-Docs/blob/main/modding-guides/quest/visualize-quest-files.md)
+- [The Pickup overview](https://cyberpunk.fandom.com/wiki/The_Pickup)
+
+### Important version boundary
+
+The RedSync base quest extraction documents a game install build labelled 1.0.148, while the user's Cyberpunk2077.exe file version is 3.0.5294808 and the public patch is 2.31. Its fact list is a lead to verify, not proof that the exact quest resources, fact names, or listener behavior match the user's installation.
+
+### First observation test — no state mutation
+
+1. Use a separate disposable save and choose one route through The Pickup.
+2. At runtime, read the baseline values of the candidate q003 facts.
+3. Register exact-name listeners and log callback time, fact name, and current value; do not call SetFact and do not relay anything over the network.
+4. Repeat from a clean test save using a different route, then compare which facts changed and at what point.
+5. Inspect the matching q003 .quest / .questphase resources with a quest graph viewer to confirm what each changed fact means.
+6. Only nominate a fact as a branch signal if both the resource graph and repeated observations support that interpretation.
+
+### Go/no-go criteria
+
+Proceed to a network prototype only if the observer compiles on the target build, callbacks fire predictably, and the candidate fact maps unambiguously to an outcome. If multiple branches share the same fact or the event arrives too late to prevent local divergence, keep the scope to post-outcome diagnostics and investigate a stronger signal.
+
+No such observer has been implemented in this fork yet. No runtime tests or builds have been performed.
