@@ -1,7 +1,7 @@
 // @version 1.0
 // Read-only metadata report for the q003 quest graphs.
 // Reads directly from WolvenKit's mounted game archives and prints a filtered report to the Log.
-// This script does not extract, save, export, edit, or package any game resource.
+// This script does not write resource files or exported JSON to disk, edit, or package game resources.
 
 import * as Logger from 'Logger.wscript';
 
