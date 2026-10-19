@@ -236,3 +236,18 @@ Reference: [The Pickup technical overview and branch descriptions](https://cyber
 ### Why the next milestone is still blocked
 
 The public sources found so far establish the quest identity and a safe inspection workflow, but not the actual resource graph. I cannot access the user's installed game archives from this session, and I have not installed or run WolvenKit. No exact q003 resource path or branch-to-fact mapping is claimed. The next concrete input needed is a read-only node/property summary from the user's local Asset Browser, or explicit approval to proceed with setting up the inspection tool.
+
+## Follow-up: metadata-only inspection through WolvenKit's in-memory script API
+
+WolvenKit's WScript API exposes `GetFileFromArchive(path, OpenAs.Json)`. Its source resolves the named entry in mounted game archives, extracts the entry into a memory stream, and converts it to JSON in memory. A WScript can therefore inspect the quest graph without adding a vanilla resource to a mod project or writing an exported copy. WolvenKit's Script Manager supports user `.wscript` files and its `Logger.Info` helper sends text to the Log window.
+
+- [WolvenKit WScript guide](https://wiki.redmodding.org/wolvenkit/wolvenkit-app/usage/scripting-with-wscript)
+- [WolvenKit script API source](https://github.com/WolvenKit/WolvenKit/blob/main/WolvenKit.Modkit/Scripting/ScriptFunctions.cs)
+- [WolvenKit Log helper source](https://github.com/WolvenKit/Wolvenkit-Resources/blob/main/Scripts/Logger.wscript)
+- Read-only report script: [tools/research/q003_wolvenkit_readonly_report.wscript](../tools/research/q003_wolvenkit_readonly_report.wscript)
+
+The script reads the known q003 root phase, Royce deal phase, and deal scene from the configured game archives. It prints only resource paths, node IDs/types, selected fact/condition/phase/scene fields, socket names/types, and compact connection destinations. It does not call WolvenKit's extraction, project-save, raw-save, or export functions, and it does not write into the game installation or save directories.
+
+**Status:** source-reviewed design only. This session could read the repository branch and the game executable path, but the local WolvenKit app was not available to run the script here. Compatibility with the handoff's WolvenKit 9.1.0 installation and the actual q003 graph JSON shape remains unverified. The emitted destination metadata may need a small follow-up adjustment if WolvenKit serializes weak graph handles differently than expected. No branch-to-fact interpretation is established by the script output alone.
+
+Next step: add the script through WolvenKit's Tools → Script Manager, run it with the normal game archive configuration, and share the Log output. Keep the quest resources open for inspection only; do not add them to a mod project, save, or export them.
