@@ -20,19 +20,31 @@ Develop online, two-player story co-op for Cyberpunk 2077, with the host control
 - The inspected interface does not expose dialogue-choice RPCs.
 - A tracked quest identifier is not evidence that the guest's quest flags, objectives, branches, or save state have been synchronized.
 
+## Network and Code Generation Findings
+- `code/protocol/client.proto` and `server.proto` define transport messages using Protocol Buffers.
+- Their `RpcCall` messages carry a numeric RPC ID and serialized arguments; server RPC definitions are sent to clients.
+- The game-facing script interface declares native `ServerRpc` calls and `ClientRpc` handlers in redscript.
+- C# client/server RPC bindings are generated; `tools/codegen/xmake.lua` invokes NetPack on `.proto` files to generate C++ protocol code.
+- Therefore, a new dialogue RPC must follow the repository's full RPC/code-generation conventions. Editing generated C# by hand is not an acceptable implementation.
+- Transport schema changes may be unnecessary if the existing generic RPC envelope can carry a new registered RPC; confirm generator conventions before deciding.
+- The current host world report is periodic snapshot data, not an ordered stream of one-shot story events. Dialogue will need explicit event ordering/deduplication or equivalent reliable semantics.
+
 ## Evidence and Unknowns
 ### Observed
 - Source: [Coop.reds](https://github.com/Friendly-13/cp2077-coop/blob/main/code/assets/redscript/Plugins/Coop.reds)
 - Source: [Plugin.cs](https://github.com/Friendly-13/cp2077-coop/blob/main/code/server/scripting/CoopSystem/Plugin.cs)
+- Source: [client.proto](https://github.com/Friendly-13/cp2077-coop/blob/main/code/protocol/client.proto)
+- Source: [server.proto](https://github.com/Friendly-13/cp2077-coop/blob/main/code/protocol/server.proto)
+- Source: [NetPack generation rule](https://github.com/Friendly-13/cp2077-coop/blob/main/tools/codegen/xmake.lua)
 - Source: [generated client RPCs](https://github.com/Friendly-13/cp2077-coop/blob/main/code/server/scripting/CoopSystem/Client/Plugins.CoopClient.cs)
 - Source: [generated server RPCs](https://github.com/Friendly-13/cp2077-coop/blob/main/code/server/scripting/CoopSystem/Server/Plugins.CoopServer.cs)
-- RPC bindings are represented by generated C# files; adding a feature likely requires following the repository's generation workflow, not editing only generated files.
 
 ### Unknown / not tested
 - Exact stable identifiers for dialogue scenes and choice options on patch 2.31.
 - A safe API for making the guest select/apply the host's choice.
 - Whether local scene scripts can be paused or reliably prevented from diverging.
 - Whether the same build and required dependencies work on the guest's GOG installation.
+- Whether the generic RPC dispatcher safely handles a new event type without transport changes.
 - Any in-game two-client behavior. No runtime test has been run.
 
 ## Design Proposal
