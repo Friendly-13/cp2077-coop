@@ -251,3 +251,14 @@ The script reads the known q003 root phase, Royce deal phase, and deal scene fro
 **Status:** source-reviewed design only. This session could read the repository branch and the game executable path, but the local WolvenKit app was not available to run the script here. Compatibility with the handoff's WolvenKit 9.1.0 installation and the actual q003 graph JSON shape remains unverified. The emitted destination metadata may need a small follow-up adjustment if WolvenKit serializes weak graph handles differently than expected. No branch-to-fact interpretation is established by the script output alone.
 
 Next step: add the script through WolvenKit's Tools → Script Manager, run it with the normal game archive configuration, and share the Log output. Keep the quest resources open for inspection only; do not add them to a mod project, save, or export them.
+
+
+## Follow-up: first WolvenKit report run (2026-10-19)
+
+The attached WolvenKit 9.1.0 log shows that the metadata script completed and read the q003 root phase and `q003_03_deal.scene` in memory. It reported 634 recursively discovered node definitions for the phase resource and 487 for the scene. The phase count includes nested embedded phase graphs; it should not be read as the count of nodes in the parent graph alone. The log contains multiple runs of the same report.
+
+The report attempted to open `base\\quest\\main_quests\\prologue\\q003\\q003_royce_deal.questphase`, which was not found. The q003 root graph's node ID 161 references `base\\quest\\main_quests\\prologue\\q003\\phases\\q003_royce_deal.questphase`. In that parent graph record, the named exits `Hostile Deal` and `Peaceful Deal` each have a connection. This confirms two connected structural exits; it does not map either exit to a particular persistent fact.
+
+The WScript was updated to use the referenced child-phase path, report direct questphase graph nodes, shorten socket-connection metadata, and filter the scene report to relevant quest-flow node types and selected fact/condition/reward fields. It still reads archive entries in memory and prints metadata to WolvenKit's Log; it does not write or export game resources.
+
+**Evidence status:** Observed in the attached log: WolvenKit 9.1.0, successful in-memory reads for q003 root and deal scene, and the parent phase's two connected named exits. Not yet observed: a successful read of the corrected Royce child-phase path or the revised script's output. No branch-to-fact mapping, runtime behavior, game build, or save change is claimed.
