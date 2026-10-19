@@ -262,3 +262,26 @@ The report attempted to open `base\\quest\\main_quests\\prologue\\q003\\q003_roy
 The WScript was updated to use the referenced child-phase path, report direct questphase graph nodes, shorten socket-connection metadata, and filter the scene report to relevant quest-flow node types and selected fact/condition/reward fields. It still reads archive entries in memory and prints metadata to WolvenKit's Log; it does not write or export game resources.
 
 **Evidence status:** Observed in the attached log: WolvenKit 9.1.0, successful in-memory reads for q003 root and deal scene, and the parent phase's two connected named exits. Not yet observed: a successful read of the corrected Royce child-phase path or the revised script's output. No branch-to-fact mapping, runtime behavior, game build, or save change is claimed.
+
+
+## Follow-up: corrected WolvenKit report run (2026-10-19)
+
+The latest local WolvenKit log shows the revised WScript completed in 0.28 seconds on WolvenKit 9.1.0. All three requested resources were read in memory:
+
+- `q003.questphase`: 634 recursively discovered node definitions, 60 direct root-graph nodes.
+- `q003/phases/q003_royce_deal.questphase`: 48 discovered/direct graph nodes.
+- `q003/scenes/q003_03_deal.scene`: 487 discovered nodes, 486 direct graph nodes, 123 selected report rows.
+
+### Observed graph and fact metadata
+
+- In the q003 root, phase node ID 161 references the corrected Royce phase path. Its `Hostile Deal` and `Peaceful Deal` output sockets each have one connection to an input socket.
+- In `q003_royce_deal.questphase`, scene node ID 359 references `q003_03_deal.scene` at marker `#q003_03_sm_deal`.
+- In the deal scene, FactsDBManager node ID 7920 writes `q003_deal_hostile = 1`; condition nodes 7924, 7931, 7991, 8003, and 9155 each test `q003_deal_hostile == 1`.
+- FactsDBManager node ID 7529 writes `q003_deal_peaceful = 1`. The current report did not establish which scene exit leads to this write.
+- Other observed writes include `q003_deal_started` at node 6820, `q003_no_deal` at node 8455, and `q003_no_deal_sit` at node 8472. In the Royce phase, condition node ID 341 tests `q003_no_deal > 0`, and node ID 366 tests `q003_no_deal_sit > 0`.
+
+### Evidence boundary and next inspection
+
+These are resource-structure observations, not in-game behavior. The report's scene-node socket connection arrays are empty, so it does not trace the wire from a named scene exit to the fact writer. The hostile fact has multiple scene readers, making it a strong branch-related candidate, but exact choice-to-exit mapping and the peaceful fact's downstream readers remain unverified. Do not use either as a network outcome key until the scene graph's connection structure is traced.
+
+The corrected script is on the feature branch at [tools/research/q003_wolvenkit_readonly_report.wscript](../tools/research/q003_wolvenkit_readonly_report.wscript). No game resources were edited or exported, and no game/save files were changed. No implementation, build, or runtime test has been performed.
