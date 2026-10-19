@@ -32,3 +32,23 @@ Do not use a display string, localized caption, or tracked quest label as the au
 ## Status and next research
 
 No dialogue RPC or runtime hook has been implemented. Next, inspect available REDscript/RED4ext event APIs and existing CyberpunkMP native lookup patterns to determine whether a reliable runtime event can be observed without replacing vanilla scene resources.
+
+## Runtime-hook investigation (follow-up)
+
+The CDPR Modding Documentation's scene-node reference confirms that `scnChoiceNode` exposes option rows and output sockets, while the RED Questbook's node/socket index distinguishes scene-local routing from the named scene exit and the questphase result. These are useful authoring-time identities, but the documents do **not** establish that a stable runtime callback for a player's selected option is exposed to redscript or RED4ext.
+
+- [CDPR Modding Docs: scene node definitions](https://github.com/CDPR-Modding-Documentation/Cyberpunk-Modding-Docs/blob/main/modding-guides/quest/scene-node-definitions.md)
+- [RED Questbook: node and socket index](https://hlky.github.io/cyberpunk-quest-authoring/reference/node-and-socket-index.html)
+- [CDPR Modding Docs: visualize quest files](https://github.com/CDPR-Modding-Documentation/Cyberpunk-Modding-Docs/blob/main/modding-guides/quest/visualize-quest-files.md)
+
+### Implication for implementation
+
+Do not implement a guessed hook such as a generic `OnChoice` callback yet. The current fork has no such hook or dialogue RPC in the inspected files, and repository code search did not reveal one. The existing native wrapper demonstrates guarded runtime function lookup, but it only covers game-time, weather, and journal tracking; its existence is not evidence that dialogue functions are safe to call.
+
+The next research gate is to identify a concrete runtime event source (for example, a scene/quest callback or an observable transition) and verify its signature against the user's exact game build before wiring networking. If no stable callback exists, a safer first prototype may be **post-outcome synchronization for one known branch**, rather than attempting to mirror every live dialogue click.
+
+### Confidence labels
+
+- **Confirmed by source inspection:** the current fork's inspected scripts expose no dialogue-choice RPC; tracked quest reporting is journal-path telemetry only.
+- **Confirmed by authoring documentation:** choice option, graph output, named scene exit, and durable quest result are distinct structures.
+- **Not yet established:** a reliable runtime callback for a selected dialogue option; a safe generic way to apply arbitrary story outcomes; behavior parity between the user's Steam build and the documented GOG 2.31a baseline.
