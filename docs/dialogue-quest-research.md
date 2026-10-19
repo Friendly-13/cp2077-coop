@@ -219,3 +219,20 @@ For each candidate q003 fact, record: (a) the exact resource where it is written
 ### Next checkpoint
 
 At present, the actual q003 resources have not been opened. This environment has not installed WolvenKit or accessed the user's local archives, so the graph-to-fact mapping remains unresolved. The next action requiring user-side participation is to open the q003 quest/phase/scene resources in WolvenKit or provide a small text summary of the relevant node IDs, sockets, and fact-write properties. Do not upload full vanilla resource dumps or modify the original game files.
+## Follow-up: identify the quest root, but do not guess depot paths
+
+Public quest references identify The Pickup's technical base ID as `q003_maelstrom` and describe several materially different routes through Meredith Stout, the Militech credchip, and the Maelstrom negotiation. This is useful for narrowing the Asset Browser search, but it does not reveal the exact questphase/scene depot paths or prove which fact records each branch.
+
+Reference: [The Pickup technical overview and branch descriptions](https://cyberpunk.fandom.com/wiki/The_Pickup).
+
+### Asset Browser search order
+
+1. Search the installed base-game archives for `q003_maelstrom` first, then `q003` if no exact root appears.
+2. Filter/inspect results by resource type (`.quest`, `.questphase`, `.scene`) and use the resource dependency view to follow references. Do not infer the depot path from the quest ID or file name alone.
+3. Start at the quest root and follow phase references until the scene that owns the Militech/Maelstrom negotiation is identified. Record exact depot paths and node IDs locally.
+4. From the relevant scene, record choice-node outputs and named scene exits. Follow the corresponding questphase branch and locate fact writes and later readers.
+5. Keep the evidence separate: public walkthroughs describe player-visible branches; resource graphs show authored structure; only a runtime observation can show when a particular fact changes on the target build.
+
+### Why the next milestone is still blocked
+
+The public sources found so far establish the quest identity and a safe inspection workflow, but not the actual resource graph. I cannot access the user's installed game archives from this session, and I have not installed or run WolvenKit. No exact q003 resource path or branch-to-fact mapping is claimed. The next concrete input needed is a read-only node/property summary from the user's local Asset Browser, or explicit approval to proceed with setting up the inspection tool.
