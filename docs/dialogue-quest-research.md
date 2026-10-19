@@ -246,7 +246,7 @@ WolvenKit's WScript API exposes `GetFileFromArchive(path, OpenAs.Json)`. Its sou
 - [WolvenKit Log helper source](https://github.com/WolvenKit/Wolvenkit-Resources/blob/main/Scripts/Logger.wscript)
 - Read-only report script: [tools/research/q003_wolvenkit_readonly_report.wscript](../tools/research/q003_wolvenkit_readonly_report.wscript)
 
-The script reads the known q003 root phase, Royce deal phase, and deal scene from the configured game archives. It prints only resource paths, node IDs/types, selected fact/condition/phase/scene fields, socket names/types, and compact connection destinations. It does not call WolvenKit's extraction, project-save, raw-save, or export functions, and it does not write into the game installation or save directories.
+The script reads the known q003 root phase, Royce deal phase, and deal scene from the configured game archives. It prints only resource paths, node IDs/types, selected fact/condition/phase/scene fields, socket names/types, and compact connection destinations. The documented API reads and decodes the selected archive entry in memory; the script does not write resource files or exported JSON to disk, edit resources, or touch the game installation or save directories.
 
 **Status:** source-reviewed design only. This session could read the repository branch and the game executable path, but the local WolvenKit app was not available to run the script here. Compatibility with the handoff's WolvenKit 9.1.0 installation and the actual q003 graph JSON shape remains unverified. The emitted destination metadata may need a small follow-up adjustment if WolvenKit serializes weak graph handles differently than expected. No branch-to-fact interpretation is established by the script output alone.
 
