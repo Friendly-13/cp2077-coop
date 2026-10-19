@@ -1,15 +1,27 @@
-// @version 1.0
+// @version 1.1
 // Read-only metadata report for the q003 quest graphs.
 // Reads directly from WolvenKit's mounted game archives and prints a filtered report to the Log.
-// This script does not write resource files or exported JSON to disk, edit, or package game resources.
+// This script does not write resource files, export resource JSON, edit, or package game resources.
 
 import * as Logger from 'Logger.wscript';
 
 const RESOURCE_PATHS = [
     'base\\quest\\main_quests\\prologue\\q003\\q003.questphase',
-    'base\\quest\\main_quests\\prologue\\q003\\q003_royce_deal.questphase',
+    'base\\quest\\main_quests\\prologue\\q003\\phases\\q003_royce_deal.questphase',
     'base\\quest\\main_quests\\prologue\\q003\\scenes\\q003_03_deal.scene'
 ];
+
+const SCENE_NODE_TYPES = new Set([
+    'questCheckpointNodeDefinition',
+    'questConditionNodeDefinition',
+    'questFactsDBManagerNodeDefinition',
+    'questInputNodeDefinition',
+    'questJournalNodeDefinition',
+    'questOutputNodeDefinition',
+    'questPauseConditionNodeDefinition',
+    'questRewardManagerNodeDefinition',
+    'questSceneManagerNodeDefinition'
+]);
 
 const INTERESTING_FIELDS = new Set([
     'debugstring',
@@ -114,7 +126,14 @@ function readSockets(node) {
         const rawConnections = prop(socket, 'connections');
         const connections = Array.isArray(rawConnections) ? rawConnections.map(rawConnection => {
             const connection = unwrap(rawConnection);
-            return { destination: compact(prop(connection, 'destination'), 500) };
+            const destination = prop(connection, 'destination');
+            const destinationData = unwrap(prop(destination, 'Data'));
+            return {
+                handleId: compact(prop(destination, 'HandleId')),
+                handleRefId: compact(prop(destination, 'HandleRefId')),
+                destinationSocket: compact(prop(destinationData, 'name')),
+                destinationType: compact(prop(destinationData, 'type'))
+            };
         }) : [];
         return {
             index: socketIndex,
@@ -180,13 +199,35 @@ for (const resourcePath of RESOURCE_PATHS) {
 
     const nodes = [];
     collectNodes(parsed, '$', nodes, 0);
-    const report = nodes.map(item => {
+    const isDirectGraphNode = item => {
+        if (/\.scene$/i.test(resourcePath)) {
+            return /^\$\.RootChunk\.sceneGraph\.graph\[\d+\]\.questNode$/.test(item.jsonPath);
+        }
+        return /^\$\.RootChunk\.graph\.nodes\[\d+\]$/.test(item.jsonPath);
+    };
+    const directNodes = nodes.filter(isDirectGraphNode);
+    const selectedNodes = /\.scene$/i.test(resourcePath)
+        ? directNodes.filter(item => SCENE_NODE_TYPES.has(item.type) || item.fields.some(field =>
+            /factname|debugstring|comparisonType|reward/i.test(field.field)))
+        : directNodes;
+    const typeCounts = {};
+    selectedNodes.forEach(item => {
+        typeCounts[item.type] = (typeCounts[item.type] || 0) + 1;
+    });
+    const report = selectedNodes.map(item => {
         const copy = Object.assign({}, item);
         delete copy._key;
         return copy;
     });
 
-    Logger.Info(JSON.stringify({ resource: resourcePath, status: 'read in memory', nodeCount: report.length }));
+    Logger.Info(JSON.stringify({
+        resource: resourcePath,
+        status: 'read in memory',
+        allDiscoveredNodeCount: nodes.length,
+        directGraphNodeCount: directNodes.length,
+        reportedNodeCount: report.length,
+        reportedTypes: typeCounts
+    }));
     report.forEach(item => Logger.Info(JSON.stringify(item)));
 }
 
