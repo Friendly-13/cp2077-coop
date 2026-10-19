@@ -52,3 +52,37 @@ The next research gate is to identify a concrete runtime event source (for examp
 - **Confirmed by source inspection:** the current fork's inspected scripts expose no dialogue-choice RPC; tracked quest reporting is journal-path telemetry only.
 - **Confirmed by authoring documentation:** choice option, graph output, named scene exit, and durable quest result are distinct structures.
 - **Not yet established:** a reliable runtime callback for a selected dialogue option; a safe generic way to apply arbitrary story outcomes; behavior parity between the user's Steam build and the documented GOG 2.31a baseline.
+
+## Follow-up: fact-change listeners may be a better first milestone
+
+A public Cyberpunk multiplayer project, [RedSync](https://github.com/nobody71004/RedSync), documents a different strategy from trying to intercept the visible dialogue button. Its redscript source uses `QuestsSystem.RegisterListener(factName, listener, callbackName)` for a curated list of exact fact names. When a tracked fact changes, the host reads the new value and relays it; its follower logic attempts to suppress divergent local progression by pinning tracked facts to host-known values. It also includes a snapshot path for late joiners.
+
+References:
+- [RedSync mission-sync implementation](https://github.com/nobody71004/RedSync/blob/main/client/RedscriptModule/src/Network/RedSyncMissionSync.reds)
+- [RedSync quest fact whitelist and extracted quest coverage](https://github.com/nobody71004/RedSync/blob/main/release/BASE-QUEST-WHITELIST.md)
+- [RedSync quest fact update packet](https://github.com/nobody71004/RedSync/blob/main/server/Managed/NativeLayer/Protocol/Serverbound/QuestFactUpdate.cs)
+
+### What we can reuse as a research lead
+
+- `QuestsSystem.RegisterListener` is a concrete API candidate for observing changes to *known fact names*, without needing a generic dialogue-click hook.
+- The event reports a fact change, not the semantic choice itself. One choice may write multiple facts, and a fact may be set by unrelated quest logic. The name/value alone cannot be treated as a complete dialogue event.
+- Listener registration appears to require one exact fact name at a time; the RedSync source uses a curated tracked-fact manifest rather than a wildcard listener.
+- RedSync's own code comments describe follower pin-back as an approach that needs runtime verification. It is not evidence that arbitrary fact pinning is safe for every mission, nor that it works with our exact Steam executable and mod stack.
+
+### Revised first prototype
+
+Prefer a narrow **quest-fact observation prototype** before any attempt to mirror live dialogue input:
+
+1. Pick one low-risk branch in a disposable test save.
+2. Inspect its `.scene` and `.questphase` resources to identify a fact written specifically for the outcome.
+3. Register a listener for that exact fact and log name/value only; do not write or synchronize it yet.
+4. Confirm in-game that the listener fires at the expected point on the user's 2.31 build.
+5. Only then design a host-to-guest relay for that known outcome, including conflict handling and a clean-save test matrix.
+
+This does not solve full-story synchronization, but it gives us a measurable first milestone and avoids guessing at a dialogue API.
+
+### Confidence
+
+- **Documented in an external project's source:** RedSync implements exact-name quest-fact listeners and a host-authoritative fact relay design.
+- **Not independently validated here:** whether its listener callbacks work identically on the user's Steam build; whether its full implementation is robust for all quests; whether it can be adapted directly to this fork.
+- **Still unimplemented in our fork:** listeners, fact relay, snapshots, and quest-state enforcement.
