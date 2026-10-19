@@ -86,3 +86,24 @@ This does not solve full-story synchronization, but it gives us a measurable fir
 - **Documented in an external project's source:** RedSync implements exact-name quest-fact listeners and a host-authoritative fact relay design.
 - **Not independently validated here:** whether its listener callbacks work identically on the user's Steam build; whether its full implementation is robust for all quests; whether it can be adapted directly to this fork.
 - **Still unimplemented in our fork:** listeners, fact relay, snapshots, and quest-state enforcement.
+
+## Concrete candidate: The Pickup (q003) for a later disposable-save test
+
+RedSync's extracted quest-fact reference includes several `q003_*` facts for **The Pickup**, including `q003_deal_started`, `q003_deal_done`, `q003_deal_combat_done`, `q003_royce_bossfight_done`, and `q003_done`. This provides concrete candidate names to inspect in the actual scene/questphase resources; it does not prove which single fact uniquely identifies each dialogue branch.
+
+- [RedSync base-game quest whitelist](https://github.com/nobody71004/RedSync/blob/main/release/BASE-QUEST-WHITELIST.md)
+- [RedSync tracked-fact list](https://github.com/nobody71004/RedSync/blob/main/release/tracked_facts.json)
+- [The Pickup branch overview](https://www.powerpyx.com/cyberpunk-2077-the-pickup-walkthrough/)
+
+### Why q003 is a useful test target (not a production sync plan)
+
+The Pickup has clear, consequential branches involving Meredith Stout, the Militech credchip, and the Maelstrom negotiation. That makes it easy to notice whether two clients diverge, but it is also a risky mission to use casually because decisions can affect later content. Use only a separate, disposable test save.
+
+Proposed observation-only checklist:
+1. Before starting, log current values for the candidate `q003_*` facts.
+2. Perform one documented route on the host; log every listener callback with fact name, value, and timestamp.
+3. Repeat a different route from a fresh test save and compare the event sequences.
+4. Check which facts are merely progress markers and which facts actually distinguish outcomes by inspecting the matching `.quest` / `.questphase` resources.
+5. Do not relay or write any of these values to the guest until the listener timing and semantic meaning are verified.
+
+**Do not assume `q003_no_deal` or `q003_royce_boss` is a complete outcome key based only on its name.** The extracted lists may contain historical or derived facts, and a single branch may update several facts.
