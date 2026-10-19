@@ -199,3 +199,23 @@ References:
 ### Current blocker
 
 The public references found so far explain the inspection workflow but do not publish the exact q003 resource graph needed to prove the branch mapping. This research pass did not access the user's local game archives, install WolvenKit, or extract game resources. The next concrete action requires the user to approve tool installation or provide read-only exports of the relevant resource metadata/graphs. Until then, no branch-to-fact mapping should be treated as confirmed.
+## Follow-up: exact resource workflow and version pinning
+
+Current documentation research confirms a practical way to proceed without touching the game install: WolvenKit's Asset Browser can open a vanilla resource without adding it to a project, and its Quest Editor displays `.questphase` node graphs. The RED Questbook recommends a disposable inspection project when a resource must be extracted and warns not to package the vanilla resource. These are inspection procedures, not proof of q003's actual branch mapping.
+
+References:
+- [CDPR Modding Docs: visualize quest files](https://github.com/CDPR-Modding-Documentation/Cyberpunk-Modding-Docs/blob/main/modding-guides/quest/visualize-quest-files.md)
+- [WolvenKit Quest Editor guide](https://wiki.redmodding.org/wolvenkit/wolvenkit-app/editor/quest-editor)
+- [RED Questbook: inspect a vanilla questphase](https://hlky.github.io/cyberpunk-quest-authoring/start-here/inspecting-vanilla.html)
+
+### Version rule
+
+Pin all observations to the user's own installation: public patch label 2.31 and executable file version 3.0.5294808. The RED Questbook's 2.31a inspection baseline is a useful cross-check but must not substitute for reading the user's own archives. Record the WolvenKit version and the exact depot path with every finding.
+
+### What counts as evidence
+
+For each candidate q003 fact, record: (a) the exact resource where it is written, (b) the writer node type and ID, (c) the connected input/output socket path, (d) the downstream reader(s), and (e) a separate label for whether the relationship is only structural or has been observed in-game. Do not equate a fact prefix or a tracked-fact list with a dialogue branch.
+
+### Next checkpoint
+
+At present, the actual q003 resources have not been opened. This environment has not installed WolvenKit or accessed the user's local archives, so the graph-to-fact mapping remains unresolved. The next action requiring user-side participation is to open the q003 quest/phase/scene resources in WolvenKit or provide a small text summary of the relevant node IDs, sockets, and fact-write properties. Do not upload full vanilla resource dumps or modify the original game files.
