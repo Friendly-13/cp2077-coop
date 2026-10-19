@@ -178,3 +178,24 @@ References:
 5. Keep the eventual runtime test on a disposable save; listener observation first, no fact writes or network relay.
 
 No quest resources were extracted, no tools were installed, and no game/save files were changed during this research pass. Resource-level branch mapping remains blocked pending access to the actual quest assets.
+## Follow-up: make the resource-inspection step reproducible
+
+The official CDPR guide confirms that quest progression is represented by `.questphase` graphs which reference other phases and scenes; WolvenKit's Asset Browser can open a resource for inspection without adding it to a mod project. The RED Questbook's vanilla-inspection procedure adds an important safety boundary: use a separate disposable inspection project, keep extracted vanilla resources local, and never package them as part of the mod.
+
+References:
+- [CDPR Modding Docs: visualize quest files](https://github.com/CDPR-Modding-Documentation/Cyberpunk-Modding-Docs/blob/main/modding-guides/quest/visualize-quest-files.md)
+- [RED Questbook: inspect a vanilla questphase](https://hlky.github.io/cyberpunk-quest-authoring/start-here/inspecting-vanilla.html)
+- [WolvenKit Quest Editor guide](https://wiki.redmodding.org/wolvenkit/wolvenkit-app/editor/quest-editor)
+
+### Read-only inspection checklist
+
+1. In WolvenKit's Asset Browser, ensure base-game archive browsing is selected rather than Mod Browser mode.
+2. Search for `q003` and identify the root quest/phase resources and their referenced child phases/scenes. Do not assume the depot path from the fact prefix; follow actual resource references.
+3. Open the relevant `.questphase` and `.scene` resources without adding them to a distributable mod project, or place them in a dedicated inspection-only project that is never built.
+4. Record source depot path, resource type, node IDs/types, outgoing socket names, scene exit names, fact write nodes, and downstream fact readers. Avoid copying full vanilla resource payloads into this repository.
+5. Trace any candidate fact from its writer to the questphase/scene branch and to later readers. A name or value alone is insufficient to classify a dialogue outcome.
+6. If the correct resource cannot be located, record the search terms and results and stop rather than guessing a path or using a similarly named resource.
+
+### Current blocker
+
+The public references found so far explain the inspection workflow but do not publish the exact q003 resource graph needed to prove the branch mapping. This research pass did not access the user's local game archives, install WolvenKit, or extract game resources. The next concrete action requires the user to approve tool installation or provide read-only exports of the relevant resource metadata/graphs. Until then, no branch-to-fact mapping should be treated as confirmed.
